@@ -1,0 +1,38 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "images/uploads"
+public_folder: "/images/uploads"
+
+collections:
+  - name: "garlands"
+    label: "Garlands & Products"
+    folder: "_data/garlands"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Product Name", name: "name", widget: "string" }
+      - label: "Category"
+        name: "category"
+        widget: "select"
+        options:
+          - { label: "Rose Garlands", value: "rose-garlands" }
+          - { label: "Carnation Garlands", value: "carnation-garlands" }
+          - { label: "Mums Garland", value: "mums-garland" }
+          - { label: "Rose Petals Garland", value: "rose-petals-garland" }
+          - { label: "Bouquets", value: "bouquets" }
+          - { label: "Floral Accessories", value: "floral-accessories" }
+      - { label: "Price", name: "price", widget: "string" }
+      - { label: "Description", name: "description", widget: "text" }
+      - { label: "Product Photo", name: "photo", widget: "image" }
+      - { label: "Available", name: "available", widget: "boolean", default: true }
+  - name: "faq"
+    label: "FAQ"
+    folder: "_data/faq"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Question", name: "question", widget: "string" }
+      - { label: "Answer", name: "answer", widget: "text" }
+      - { label: "Order", name: "order", widget: "number", default: 1 }
