@@ -2,6 +2,37 @@
 <html lang="en">
 <head>
   <script>
+  /* ------------------------------------------------------------------
+     Netlify Identity — capture invite / password-recovery tokens.
+     The recovery and invite emails send the user back to this page with
+     the token in the URL hash (e.g. #recovery_token=... or
+     #invite_token=...). We grab and clear it immediately, BEFORE the
+     Identity widget loads, so we can drive our own reliable "set a new
+     password" form via the Identity REST API instead of depending on the
+     widget's pop-up (which was not surfacing the password field).
+  ------------------------------------------------------------------ */
+  (function () {
+    var hash = (window.location.hash || "").replace(/^#/, "");
+    var params = new URLSearchParams(hash);
+    var recovery = params.get("recovery_token");
+    var invite = params.get("invite_token");
+    if (recovery || invite) {
+      window.__nfAuthToken = {
+        type: recovery ? "recovery" : "invite",
+        token: recovery || invite,
+      };
+      // Strip the token from the URL so the widget doesn't double-handle it
+      // and so the token isn't left in the address bar / history.
+      try {
+        history.replaceState(null, "", window.location.pathname + window.location.search);
+      } catch (e) {
+        window.location.hash = "";
+      }
+    }
+  })();
+</script>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script>
   if (window.netlifyIdentity) {
     window.netlifyIdentity.on("init", user => {
       if (!user) {
@@ -332,6 +363,8 @@
         <a href="#mission">About</a>
         <a href="#enquiry">Send an enquiry</a>
         <a href="/return-policy.html">Return Policy</a>
+        <a href="/admin/">Admin login</a>
+        <a href="#" data-reset-password>Reset password</a>
       </div>
     </div>
     <div class="legal">© <span id="yr">2026</span> Soundaryas LLC. All rights reserved.</div>
@@ -501,6 +534,180 @@ document.getElementById('sendBtn').addEventListener('click',()=>{
 renderFilters();
 renderGrid();
 document.getElementById('yr').textContent=new Date().getFullYear();
+</script>
+
+<!-- ============================================================
+     ACCOUNT ACCESS — password reset / invite acceptance overlay.
+     Talks directly to Netlify Identity's REST API so a recovery or
+     invite link always presents a working "set your password" form.
+     ============================================================ -->
+<style>
+  #pwOverlay{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;
+    padding:24px;background:rgba(13,28,82,.55);backdrop-filter:blur(6px);}
+  #pwOverlay.show{display:flex;}
+  #pwOverlay .pw-card{background:#fff;border-radius:22px;max-width:440px;width:100%;
+    padding:38px 34px;box-shadow:0 30px 70px -30px rgba(19,40,106,.55);border:1px solid var(--line);}
+  #pwOverlay .pw-logo{font-family:"Poppins",sans-serif;font-weight:600;font-size:1.3rem;margin:0 0 .2rem;}
+  #pwOverlay .pw-logo .b1{color:var(--navy);} #pwOverlay .pw-logo .b2{color:var(--red);}
+  #pwOverlay h2{font-size:1.7rem;color:var(--blue);margin:.4rem 0 .3rem;}
+  #pwOverlay p.sub{color:var(--muted);font-size:.95rem;margin:0 0 1.3rem;}
+  #pwOverlay label{display:block;font-size:.82rem;font-weight:500;color:var(--ink);margin:.9rem 0 .35rem;}
+  #pwOverlay input{width:100%;padding:.78rem .95rem;border:1.4px solid var(--line);border-radius:12px;
+    font-family:inherit;font-size:1rem;color:var(--ink);background:#fff;}
+  #pwOverlay input:focus{outline:none;border-color:var(--blue);}
+  #pwOverlay .pw-actions{margin-top:1.4rem;}
+  #pwOverlay .btn{width:100%;justify-content:center;}
+  #pwOverlay .pw-msg{margin-top:1rem;font-size:.9rem;display:none;}
+  #pwOverlay .pw-msg.err{display:block;color:var(--red);}
+  #pwOverlay .pw-msg.ok{display:block;color:#1B7A3D;}
+  #pwOverlay .pw-alt{margin-top:1.2rem;font-size:.86rem;text-align:center;color:var(--muted);}
+  #pwOverlay .pw-alt a{color:var(--blue);cursor:pointer;text-decoration:underline;}
+</style>
+<div id="pwOverlay" role="dialog" aria-modal="true" aria-labelledby="pwTitle">
+  <div class="pw-card">
+    <div class="pw-logo"><span class="b1">Blooms</span> <span class="b2">by Visaka</span></div>
+
+    <!-- View: set a new password (recovery / invite) -->
+    <div id="pwSetView">
+      <h2 id="pwTitle">Set your password</h2>
+      <p class="sub" id="pwSetSub">Choose a password to access your account.</p>
+      <label for="pwNew">New password</label>
+      <input id="pwNew" type="password" autocomplete="new-password" placeholder="At least 6 characters" />
+      <label for="pwConfirm">Confirm password</label>
+      <input id="pwConfirm" type="password" autocomplete="new-password" placeholder="Re-enter password" />
+      <div class="pw-actions">
+        <button class="btn solid" id="pwSetBtn" type="button">Save password</button>
+      </div>
+      <div class="pw-msg" id="pwSetMsg"></div>
+    </div>
+
+    <!-- View: request a reset email -->
+    <div id="pwRequestView" style="display:none;">
+      <h2>Reset your password</h2>
+      <p class="sub">Enter your account email and we'll send you a reset link.</p>
+      <label for="pwEmail">Email</label>
+      <input id="pwEmail" type="email" autocomplete="email" placeholder="you@example.com" />
+      <div class="pw-actions">
+        <button class="btn solid" id="pwRequestBtn" type="button">Send reset link</button>
+      </div>
+      <div class="pw-msg" id="pwRequestMsg"></div>
+      <div class="pw-alt"><a id="pwCloseLink">Cancel</a></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- Netlify Identity password reset (REST) ---------- */
+(function () {
+  var IDENTITY = "/.netlify/identity";
+  var overlay = document.getElementById("pwOverlay");
+  var setView = document.getElementById("pwSetView");
+  var requestView = document.getElementById("pwRequestView");
+
+  function show(){ overlay.classList.add("show"); }
+  function hide(){ overlay.classList.remove("show"); }
+  function msg(el, text, kind){ el.textContent = text; el.className = "pw-msg " + kind; }
+
+  // --- Flow A: arrived from a recovery / invite email link ---
+  var auth = window.__nfAuthToken;
+  if (auth && auth.token) {
+    setView.style.display = "";
+    requestView.style.display = "none";
+    if (auth.type === "invite") {
+      document.getElementById("pwTitle").textContent = "Welcome — set your password";
+      document.getElementById("pwSetSub").textContent = "Create a password to activate your account.";
+    }
+    show();
+  }
+
+  var setBtn = document.getElementById("pwSetBtn");
+  var setMsg = document.getElementById("pwSetMsg");
+  setBtn && setBtn.addEventListener("click", function () {
+    var pw = document.getElementById("pwNew").value;
+    var confirm = document.getElementById("pwConfirm").value;
+    if (pw.length < 6) { msg(setMsg, "Password must be at least 6 characters.", "err"); return; }
+    if (pw !== confirm) { msg(setMsg, "Passwords do not match.", "err"); return; }
+    if (!auth || !auth.token) { msg(setMsg, "This reset link is missing or has expired. Request a new one.", "err"); return; }
+
+    setBtn.disabled = true;
+    msg(setMsg, "Saving…", "ok");
+
+    // Step 1: exchange the email token for a session.
+    fetch(IDENTITY + "/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: auth.type === "invite" ? "signup" : "recovery", token: auth.token })
+    })
+    .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+    .then(function (res) {
+      if (!res.ok || !res.d.access_token) {
+        throw new Error((res.d && (res.d.msg || res.d.error_description)) || "This link is invalid or has expired.");
+      }
+      // Step 2: set the chosen password on the now-authenticated user.
+      return fetch(IDENTITY + "/user", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + res.d.access_token
+        },
+        body: JSON.stringify({ password: pw })
+      });
+    })
+    .then(function (r) {
+      if (!r.ok) return r.json().then(function (d) { throw new Error((d && d.msg) || "Could not update the password."); });
+      msg(setMsg, "Password saved. Redirecting to the admin login…", "ok");
+      setTimeout(function () { window.location.href = "/admin/"; }, 1500);
+    })
+    .catch(function (err) {
+      setBtn.disabled = false;
+      msg(setMsg, err.message || "Something went wrong. Please request a new reset link.", "err");
+    });
+  });
+
+  // --- Flow B: request a reset email from the site ---
+  var requestBtn = document.getElementById("pwRequestBtn");
+  var requestMsg = document.getElementById("pwRequestMsg");
+  requestBtn && requestBtn.addEventListener("click", function () {
+    var email = document.getElementById("pwEmail").value.trim();
+    if (!email || email.indexOf("@") === -1) { msg(requestMsg, "Please enter a valid email address.", "err"); return; }
+    requestBtn.disabled = true;
+    msg(requestMsg, "Sending…", "ok");
+    fetch(IDENTITY + "/recover", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email })
+    })
+    .then(function (r) {
+      requestBtn.disabled = false;
+      if (r.ok) {
+        msg(requestMsg, "If an account exists for that email, a reset link is on its way. Check your inbox.", "ok");
+      } else {
+        msg(requestMsg, "Could not send the email. Please confirm the address and try again.", "err");
+      }
+    })
+    .catch(function () {
+      requestBtn.disabled = false;
+      msg(requestMsg, "Could not reach the server. Please try again.", "err");
+    });
+  });
+
+  document.getElementById("pwCloseLink").addEventListener("click", hide);
+
+  // Public entry point so a "Reset password" link can open the request form.
+  window.openPasswordReset = function () {
+    setView.style.display = "none";
+    requestView.style.display = "";
+    show();
+  };
+
+  // Open the request form via #reset in the URL or a [data-reset] trigger.
+  if ((window.location.hash || "").indexOf("reset") !== -1 && !(auth && auth.token)) {
+    window.openPasswordReset();
+  }
+  document.querySelectorAll("[data-reset-password]").forEach(function (el) {
+    el.addEventListener("click", function (e) { e.preventDefault(); window.openPasswordReset(); });
+  });
+})();
 </script>
 </body>
 </html>
