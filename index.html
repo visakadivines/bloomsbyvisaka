@@ -1,17 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script>
-  if (window.netlifyIdentity) {
-    window.netlifyIdentity.on("init", user => {
-      if (!user) {
-        window.netlifyIdentity.on("login", () => {
-          document.location.href = "/admin/";
-        });
-      }
-    });
-  }
-</script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Bloomsbyvisaka — Indian Wedding &amp; Pooja Garlands, Shipped Nationwide</title>
@@ -388,7 +377,7 @@ const PRODUCTS = [
     desc:"White roses, button mums and baby's breath — a lighter, airier take on the classic varmala." },
   { name:"Peach Icing", flowers:"Peach rose & cushion mums", category:"Bridal", img:"https://visakadivines.com/images/uploads/upl_ee427edddae60f64.png",
     desc:"Warm peach roses and cushion mums — a soft-romantic palette that photographs beautifully." },
-  { name:"Pretty in Pink", flowers:"Pink rose & mums", category:"Bridal", img:"https://visakadivines.com/images/uploads/upl_4ab89cb3e82d144.png",
+  { name:"Pretty in Pink", flowers:"Pink rose & mums", category:"Bridal", img:"prettyinpink.png",
     desc:"Pink roses with mums for a sweet, celebratory varmala — a favourite for engagements." },
   { name:"Rose Radiance", flowers:"Rose, pearl & baby's breath", category:"Bridal", img:"https://visakadivines.com/images/uploads/upl_5637b2ff48a86d20.png",
     desc:"Roses, pearls and baby's breath — a luminous bridal garland with fine, delicate detailing." },
@@ -501,6 +490,25 @@ document.getElementById('sendBtn').addEventListener('click',()=>{
 renderFilters();
 renderGrid();
 document.getElementById('yr').textContent=new Date().getFullYear();
+</script>
+
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<script>
+  if (window.netlifyIdentity) {
+    window.netlifyIdentity.on("init", function(user) {
+      if (!user) {
+        window.netlifyIdentity.on("login", function() {
+          document.location.href = "/admin/";
+        });
+      }
+    });
+    if (window.location.hash && (
+      window.location.hash.indexOf("recovery_token") > -1 ||
+      window.location.hash.indexOf("invite_token") > -1
+    )) {
+      window.netlifyIdentity.open();
+    }
+  }
 </script>
 </body>
 </html>
