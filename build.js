@@ -10,38 +10,31 @@ if (fs.existsSync(garlandsDir)) {
   files.forEach(file => {
     try {
       const data = JSON.parse(fs.readFileSync(path.join(garlandsDir, file), 'utf8'));
-      products.push(data);
+      if (data.available !== false) {
+        products.push({
+          name: data.name || '',
+          flowers: data.flowers || '',
+          category: data.category || 'Wedding',
+          img: data.img || '',
+          desc: data.desc || data.description || '',
+          price: data.price || ''
+        });
+      }
     } catch(e) {
       console.error('Error reading', file, e);
     }
   });
 }
 
-// If no CMS products yet, use defaults
-if (products.length === 0) {
-  console.log('No CMS products found, using defaults from template');
-}
+console.log('Found', products.length, 'products in _data/garlands/');
 
 // Read template
-let html = fs.readFileSync(path.join(__dirname, 'index.template.html'), 'utf8');
+const templatePath = path.join(__dirname, 'index.template.html');
+let html = fs.readFileSync(templatePath, 'utf8');
 
-// Build PRODUCTS array from CMS data
-const productsJS = products.length > 0
-  ? `const PRODUCTS = ${JSON.stringify(products.map(p => ({
-      name: p.name || '',
-      flowers: p.flowers || p.description || '',
-      category: p.category || 'Wedding',
-      img: p.photo || p.img || '',
-      desc: p.description || p.desc || '',
-      price: p.price || ''
-    })), null, 2)};`
-  : null;
-
-if (productsJS) {
-  html = html.replace('/* __CMS_PRODUCTS__ */', productsJS);
-} else {
-  html = html.replace('/* __CMS_PRODUCTS__ */', '');
-}
+// Replace placeholder with actual PRODUCTS array
+const productsJS = `const PRODUCTS = ${JSON.stringify(products, null, 2)};`;
+html = html.replace('/* __CMS_PRODUCTS__ */', productsJS);
 
 fs.writeFileSync(path.join(__dirname, 'index.html'), html);
-console.log('Build complete — index.html generated with', products.length, 'CMS products');
+console.log('Build complete — index.html generated with', products.length, 'products');
