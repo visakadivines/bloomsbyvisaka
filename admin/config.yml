@@ -13,20 +13,21 @@ collections:
     slug: "{{slug}}"
     fields:
       - { label: "Product Name", name: "name", widget: "string" }
+      - { label: "Flowers / Material", name: "flowers", widget: "string", hint: "e.g. Red rose & baby's breath" }
       - label: "Category"
         name: "category"
         widget: "select"
         options:
-          - { label: "Rose Garlands", value: "rose-garlands" }
-          - { label: "Carnation Garlands", value: "carnation-garlands" }
-          - { label: "Mums Garland", value: "mums-garland" }
-          - { label: "Rose Petals Garland", value: "rose-petals-garland" }
-          - { label: "Bouquets", value: "bouquets" }
-          - { label: "Floral Accessories", value: "floral-accessories" }
-      - { label: "Price", name: "price", widget: "string" }
-      - { label: "Description", name: "description", widget: "text" }
-      - { label: "Product Photo", name: "photo", widget: "image" }
+          - { label: "Wedding", value: "Wedding" }
+          - { label: "Bridal", value: "Bridal" }
+          - { label: "Pooja & Festival", value: "Pooja & Festival" }
+          - { label: "Fragrant Soaps", value: "Fragrant Soaps" }
+          - { label: "Condolence", value: "Condolence" }
+      - { label: "Description", name: "desc", widget: "text" }
+      - { label: "Price (optional)", name: "price", widget: "string", required: false, hint: "e.g. Starting at $125 — leave blank if not listing price" }
+      - { label: "Product Photo", name: "img", widget: "image", required: false }
       - { label: "Available", name: "available", widget: "boolean", default: true }
+
   - name: "faq"
     label: "FAQ"
     folder: "_data/faq"
@@ -36,3 +37,14 @@ collections:
       - { label: "Question", name: "question", widget: "string" }
       - { label: "Answer", name: "answer", widget: "text" }
       - { label: "Order", name: "order", widget: "number", default: 1 }
+
+  - name: "settings"
+    label: "Site Settings"
+    files:
+      - label: "Contact Info"
+        name: "contact"
+        file: "_data/settings/contact.json"
+        fields:
+          - { label: "Phone", name: "phone", widget: "string" }
+          - { label: "Email", name: "email", widget: "string" }
+          - { label: "WhatsApp Number", name: "whatsapp", widget: "string" }
