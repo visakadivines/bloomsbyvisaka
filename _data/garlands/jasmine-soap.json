@@ -1,1 +1,8 @@
-{"name":"Jasmine Bloom Soap","flowers":"Jasmine & honey","category":"Fragrant Soaps","img":"","desc":"Soft jasmine blended with honey for a fragrant, moisturising lather.","available":true}
+{
+  "name": "Jasmine Bloom Soap",
+  "flowers": "Jasmine & Rose water ",
+  "category": "Fragrant Soaps",
+  "img": "/images/uploads/jasmine-soap.jpg",
+  "desc": "Soft jasmine blended with Rose water for a fragrant, moisturizing lather.",
+  "available": true
+}
