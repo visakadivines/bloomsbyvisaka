@@ -2,6 +2,9 @@ backend:
   name: git-gateway
   branch: main
 
+site_url: https://bloomsbyvisaka.com
+display_url: https://bloomsbyvisaka.com
+
 media_folder: "images/uploads"
 public_folder: "/images/uploads"
 
@@ -24,7 +27,7 @@ collections:
           - { label: "Fragrant Soaps", value: "Fragrant Soaps" }
           - { label: "Condolence", value: "Condolence" }
       - { label: "Description", name: "desc", widget: "text" }
-      - { label: "Price (optional)", name: "price", widget: "string", required: false, hint: "e.g. Starting at $125 — leave blank if not listing price" }
+      - { label: "Price (optional)", name: "price", widget: "string", required: false }
       - { label: "Product Photo", name: "img", widget: "image", required: false }
       - { label: "Available", name: "available", widget: "boolean", default: true }
 
