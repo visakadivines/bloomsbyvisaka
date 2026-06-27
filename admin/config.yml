@@ -14,6 +14,8 @@ collections:
     folder: "_data/garlands"
     create: true
     slug: "{{slug}}"
+    extension: json
+    format: json
     fields:
       - { label: "Product Name", name: "name", widget: "string" }
       - { label: "Flowers / Material", name: "flowers", widget: "string", hint: "e.g. Red rose & baby's breath" }
