@@ -1,1 +1,8 @@
-{"name":"Lavender Calm Soap","flowers":"Lavender & shea butter","category":"Fragrant Soaps","img":"","desc":"Soothing lavender and rich shea butter — a relaxing bar for everyday luxury.","available":true}
+{
+  "name": "Lavender Calm Soap",
+  "flowers": "Lavender & shea butter",
+  "category": "Fragrant Soaps",
+  "img": "/images/uploads/image_2026-06-26_220928755.png",
+  "desc": "Soothing lavender and rich shea butter — a relaxing bar for everyday luxury.",
+  "available": true
+}
