@@ -1,1 +1,8 @@
-{"name":"Rose & Saffron Soap","flowers":"Rose & saffron","category":"Fragrant Soaps","img":"","desc":"A creamy handcrafted soap scented with rose and a whisper of saffron — gentle on skin and gift-ready.","available":true}
+{
+  "name": "Rose & Saffron Soap",
+  "flowers": "Rose & saffron",
+  "category": "Fragrant Soaps",
+  "img": "/images/uploads/saffron-rose-soap.jpg",
+  "desc": "A creamy handcrafted soap scented with rose and a whisper of saffron — gentle on skin and gift-ready.",
+  "available": true
+}
