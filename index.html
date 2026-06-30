@@ -9,33 +9,19 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  /* ============================================================
-     BLOOMS BY VISAKA — single-file catalog (bloomsbyvisaka.com)
-     EDIT POINTS, all near the bottom <script>:
-       1) CONFIG    — your enquiry email + phone
-       2) PRODUCTS  — your garland list (copy a {} to add one)
-     Add a NEW category (e.g. "Tanjore Paintings") just by typing a
-     new "category" value — the filters rebuild themselves.
-     Swap a placeholder for a real photo:  img:"photos/your-file.jpg"
-     Swap the hero photo: see --hero-bg below.
-     ============================================================ */
-
   :root{
-    --blue:#1B3A8F;       /* primary: headlines + buttons */
+    --blue:#1B3A8F;
     --blue-deep:#13286A;
-    --red:#C8202E;        /* accent (logo 2nd word, links) */
+    --red:#C8202E;
     --red-lt:#E2515E;
-    --navy:#1B3A8F;         /* logo 1st word = primary blue */
-    --blush:#EAF0FB;        /* soft blue section band */
-    --cream:#F4F6FA;        /* cool catalog background */
+    --navy:#1B3A8F;
+    --blush:#EAF0FB;
+    --cream:#F4F6FA;
     --ink:#23262E;
     --muted:#646A77;
     --line:rgba(27,58,143,.16);
     --shadow:0 22px 48px -26px rgba(19,40,106,.42);
     --maxw:1180px;
-
-    /* HERO BACKGROUND — replace with a photo when you have one, e.g.
-       --hero-bg: url("photos/hero.jpg") center/cover no-repeat;        */
     --hero-bg:
       radial-gradient(110% 90% at 82% 18%, rgba(200,32,46,.42), transparent 50%),
       radial-gradient(120% 120% at 10% 90%, rgba(13,28,82,.66), transparent 55%),
@@ -59,7 +45,6 @@
     font-weight:600;color:var(--red);margin:0 0 .9rem;
   }
 
-  /* buttons */
   .btn{
     display:inline-flex;align-items:center;gap:.55rem;cursor:pointer;border:none;
     font-family:inherit;font-size:.95rem;font-weight:500;text-decoration:none;
@@ -72,7 +57,6 @@
   .btn.light{background:#fff;color:var(--blue);}
   .btn.light:hover{background:#fff;transform:translateY(-1px);}
 
-  /* ---------- top bar ---------- */
   header.bar{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
   .bar .wrap{display:flex;align-items:center;justify-content:space-between;height:74px;}
   .logo{font-family:"Poppins",sans-serif;font-weight:600;font-size:1.46rem;letter-spacing:.01em;text-decoration:none;}
@@ -84,7 +68,6 @@
   nav.links a.here{background:var(--blush);color:var(--blue);font-weight:500;}
   nav.links .btn{margin-left:.5rem;}
 
-  /* ---------- hero ---------- */
   .hero{position:relative;background:var(--hero-bg);min-height:90vh;display:flex;align-items:center;}
   .hero .wrap{width:100%;padding-top:60px;padding-bottom:60px;}
   .card-glass{
@@ -103,13 +86,11 @@
   .trust b{display:block;font-size:.86rem;font-weight:600;color:var(--ink);line-height:1.3;}
   .trust small{font-size:.8rem;color:var(--muted);}
 
-  /* ---------- generic section ---------- */
   section{padding:92px 0;}
   .sec-head{max-width:62ch;margin-bottom:2.6rem;}
   .sec-head h2{font-size:clamp(2rem,4.4vw,3rem);color:var(--blue);margin:.1rem 0 .7rem;}
   .sec-head p{margin:0;color:var(--muted);}
 
-  /* ---------- catalog ---------- */
   .catalog{background:var(--cream);}
   .filters{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:2.6rem;}
   .chip{border:1.5px solid var(--line);background:#fff;color:var(--ink);padding:.5rem 1.15rem;border-radius:999px;font-size:.9rem;font-family:inherit;cursor:pointer;transition:all .18s;}
@@ -127,6 +108,7 @@
   .card .body h3{font-size:1.5rem;color:var(--blue);margin:0;}
   .card .body .flowers{font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--red);}
   .card .body p{margin:.15rem 0 0;font-size:.92rem;color:var(--muted);flex:1;}
+  .card .price{font-size:.85rem;font-weight:600;color:var(--blue);margin-top:.3rem;}
   .card .enquire-link{margin-top:1rem;align-self:flex-start;background:none;border:none;padding:0;font-family:inherit;font-size:.92rem;font-weight:600;color:var(--blue);cursor:pointer;display:inline-flex;align-items:center;gap:.4rem;}
   .card .enquire-link:hover{color:var(--red);}
   .card .enquire-link .arr{transition:transform .2s;}
@@ -135,7 +117,6 @@
   .soon{margin-top:2.6rem;font-size:.9rem;color:var(--muted);}
   .soon b{color:var(--blue);}
 
-  /* ---------- mission (blush band) ---------- */
   .mission{background:var(--blush);}
   .mission .cols{display:grid;grid-template-columns:1.05fr .95fr;gap:60px;align-items:center;}
   .mission h2{font-size:clamp(2rem,4.4vw,3rem);color:var(--blue);margin:.2rem 0 1rem;}
@@ -148,7 +129,6 @@
   .mission .art{aspect-ratio:4/5;border-radius:20px;background:linear-gradient(155deg,var(--blue),var(--blue-deep));display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);}
   .mission .art svg{width:52%;height:52%;}
 
-  /* ---------- enquiry ---------- */
   .enquiry{background:#fff;}
   .form-card{background:var(--cream);border:1px solid var(--line);border-radius:20px;padding:38px;max-width:780px;}
   .ok-msg{display:none;background:#fff;border:1.5px solid var(--red);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.3rem;color:var(--blue);}
@@ -161,7 +141,6 @@
   .form-note{font-size:.84rem;color:var(--muted);margin:1rem 0 0;}
   .err{color:#b21f33;font-weight:500;}
 
-  /* ---------- footer ---------- */
   footer{background:var(--blue-deep);color:#F3D9D0;padding:60px 0 40px;}
   footer .cols{display:flex;flex-wrap:wrap;gap:44px;justify-content:space-between;}
   footer .logo .b1{color:#fff;}
@@ -172,7 +151,6 @@
   footer .col a:hover{color:#fff;}
   footer .legal{border-top:1px solid rgba(255,255,255,.14);margin-top:38px;padding-top:20px;font-size:.82rem;color:#C79A90;}
 
-  /* ---------- responsive ---------- */
   @media (max-width:880px){
     .mission .cols{grid-template-columns:1fr;gap:34px;}
     .card-glass{padding:36px 30px;}
@@ -190,7 +168,6 @@
 </head>
 <body>
 
-<!-- reusable bloom symbol (rose-like layered flower) -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="bloom" viewBox="0 0 100 100">
     <g>
@@ -332,242 +309,43 @@
    1) CONFIG — your enquiry inbox & phone
    ============================================================ */
 const CONFIG = {
-  enquiryEmail: "soundaryas@bloomsbyvisaka.com",   // <-- where enquiries are sent
+  enquiryEmail: "soundaryas@bloomsbyvisaka.com",
   phone: "(919) 602-8947"
 };
 
 /* ============================================================
-   2) PRODUCTS — your catalog.
-   Add a product: copy a { } block.   Add a category: type a new
-   "category" value (e.g. "Tanjore Paintings") — filters auto-update.
-   Real photo:  img:"photos/your-file.jpg"  (portrait works best).
+   2) PRODUCTS — now loaded LIVE from your admin database.
+   No more hardcoding: add/edit/publish products in /admin and
+   they'll appear here automatically on next page load.
    ============================================================ */
-const PRODUCTS = [
-  {
-    "name": "Angel Blossoms",
-    "flowers": "Ivory rose, white mums & soft greens",
-    "category": "Wedding",
-    "img": "https://visakadivines.com/images/uploads/upl_a3a29047df26400c.png",
-    "desc": "Ivory roses, white mums and soft greenery — a serene, photo-friendly wedding garland.",
-    "price": ""
-  },
-  {
-    "name": "Blush Champagne & White Rose",
-    "flowers": "Blush champagne rose, pearl & baby's breath",
-    "category": "Bridal",
-    "img": "https://visakadivines.com/images/uploads/upl_c4f2388c4dbe4380.png",
-    "desc": "Blush-champagne roses woven with pearls and baby's breath for a refined, luminous bridal look.",
-    "price": ""
-  },
-  {
-    "name": "Blushing Bride",
-    "flowers": "Pink & white carnation, gold ribbon",
-    "category": "Bridal",
-    "img": "https://visakadivines.com/images/uploads/upl_f8a8182b1651d2d4.png",
-    "desc": "Soft pink and white carnations in lush sections, tied with gold ribbon bows and a pink carnation ball finish.",
-    "price": ""
-  },
-  {
-    "name": "Crimson Opulence",
-    "flowers": "Red rose petal & gold bead",
-    "category": "Wedding",
-    "img": "https://visakadivines.com/images/uploads/upl_47858346a7b268b1.png",
-    "desc": "Closely strung fresh red rose petals and lustrous gold beads, handstrung into a bold, ceremonial garland.",
-    "price": ""
-  },
-  {
-    "name": "Crimson Royale",
-    "flowers": "Crimson rose, baby's breath & gold beads",
-    "category": "Wedding",
-    "img": "https://visakadivines.com/images/uploads/upl_231784bdf7a64d72.png",
-    "desc": "Deeply rich crimson roses and closely strung petals, crowned with elegant gold-bead accents.",
-    "price": ""
-  },
-  {
-    "name": "Dewy Pearls",
-    "flowers": "Carnation & silver pearl strands",
-    "category": "Bridal",
-    "img": "https://visakadivines.com/images/uploads/upl_101f91fcaf714216.jpg",
-    "desc": "Soft carnations draped with silver pearl strands — classic, graceful and wedding-ready.",
-    "price": ""
-  },
-  {
-    "name": "Emerald Whispers",
-    "flowers": "Rose, button mums & emerald greens",
-    "category": "Wedding",
-    "img": "https://visakadivines.com/images/uploads/upl_a49d84e0eef117b6.png",
-    "desc": "Rose heads, button mums and emerald greens for a fresh, garden-style varmala.",
-    "price": ""
-  },
-  {
-    "name": "Ivory Blush",
-    "flowers": "Blush rose, white mums & baby's breath",
-    "category": "Wedding",
-    "img": "https://visakadivines.com/images/uploads/upl_72ec9e92df8b391f.png",
-    "desc": "Soft blush-pink roses and white mums, layered with baby's breath and finished with flowing pearl tassels.",
-    "price": ""
-  },
-  {
-    "name": "Majesty's Grace",
-    "flowers": "Rose & carnation blend",
-    "category": "Wedding",
-    "img": "https://visakadivines.com/images/uploads/upl_85bfe0a555d6bd4f.png",
-    "desc": "Stately rose and carnation blend — full-bodied, traditional, and made for the mandapam.",
-    "price": ""
-  },
-  {
-    "name": "Pastel Perfection",
-    "flowers": "Pink rose & mums",
-    "category": "Bridal",
-    "img": "https://visakadivines.com/images/uploads/upl_d501356b50bf1755.jpg",
-    "desc": "Pink roses and mums in soft pastels — dreamy and contemporary for engagements.",
-    "price": ""
-  },
-  {
-    "name": "Peach Carnation & Rose",
-    "flowers": "Peach carnation & rose",
-    "category": "Wedding",
-    "img": "https://visakadivines.com/images/uploads/upl_f00ab0de61e9a438.png",
-    "desc": "Peach carnations mixed with fresh rose heads — warm, wedding-ready and full of texture.",
-    "price": ""
-  },
-  {
-    "name": "Peach Icing",
-    "flowers": "Peach rose & cushion mums",
-    "category": "Bridal",
-    "img": "https://visakadivines.com/images/uploads/upl_ee427edddae60f64.png",
-    "desc": "Peach roses and cushion mums in a soft, dreamy bridal combination.",
-    "price": ""
-  },
-  {
-    "name": "Peach Rose & Baby's Breath",
-    "flowers": "Peach rose & baby's breath",
-    "category": "Wedding",
-    "img": "https://visakadivines.com/images/uploads/upl_e0b76d8222d850cd.png",
-    "desc": "Soft peach roses and delicate baby's breath, handstrung into a graceful garland with flowing tassels.",
-    "price": ""
-  },
-  {
-    "name": "Pearl Serenity",
-    "flowers": "White baby's breath & rose tassels",
-    "category": "Wedding",
-    "img": "https://visakadivines.com/images/uploads/upl_8d733c4752219c05.png",
-    "desc": "Pure white baby's breath, delicately handstrung and finished with soft white rose-bud tassels.",
-    "price": ""
-  },
-  {
-    "name": "Pink Whole Rose & Carnation",
-    "flowers": "Pink whole rose & carnation",
-    "category": "Wedding",
-    "img": "https://visakadivines.com/images/uploads/upl_7ee2afc8018426cf.png",
-    "desc": "Pink whole roses blended with carnations — soft, festive and full-bodied.",
-    "price": ""
-  },
-  {
-    "name": "Pretty in Pink",
-    "flowers": "Pink rose & mums",
-    "category": "Bridal",
-    "img": "prettyinpink.png",
-    "desc": "Dreamy pink roses and mums — soft, romantic and made for bridal moments.",
-    "price": ""
-  },
-  {
-    "name": "Red & White Carnation",
-    "flowers": "Red & white carnation",
-    "category": "Pooja & Festival",
-    "img": "https://visakadivines.com/images/uploads/upl_64bf9e7aedbd6562.png",
-    "desc": "Crisp red and white carnations — a traditional South Indian wedding and pooja favourite.",
-    "price": ""
-  },
-  {
-    "name": "Red & White Rose",
-    "flowers": "Red & white whole rose",
-    "category": "Wedding",
-    "img": "https://visakadivines.com/images/uploads/upl_c1818d226ad6f734.png",
-    "desc": "Fresh red and white roses hand-strung with care — made to order for your wedding, pooja, or festival.",
-    "price": ""
-  },
-  {
-    "name": "Red & White Whole Rose",
-    "flowers": "Red & white whole rose",
-    "category": "Wedding",
-    "img": "https://visakadivines.com/images/uploads/upl_7dd118fb4057f417.png",
-    "desc": "Hand-strung whole roses in red and white — a traditional, full-volume wedding garland.",
-    "price": ""
-  },
-  {
-    "name": "Red Whole Rose",
-    "flowers": "Fresh red whole rose",
-    "category": "Bridal",
-    "img": "https://visakadivines.com/images/thumbs/3.jpg",
-    "desc": "Dense whole-rose garland in classic red — for bridal varmala and traditional ceremonies.",
-    "price": ""
-  },
-  {
-    "name": "Rose Radiance",
-    "flowers": "Rose, pearl & baby's breath",
-    "category": "Bridal",
-    "img": "https://visakadivines.com/images/uploads/upl_5637b2ff48a86d20.png",
-    "desc": "Roses woven with pearls and baby's breath — luminous, romantic and bridal.",
-    "price": ""
-  },
-  {
-    "name": "Royal Velvette",
-    "flowers": "Spray rose & cushion mums",
-    "category": "Wedding",
-    "img": "https://visakadivines.com/images/uploads/upl_e20298ec34dd8c77.jpg",
-    "desc": "Spray roses and cushion mums in a regal, full-bodied wedding garland.",
-    "price": ""
-  },
-  {
-    "name": "Ruby Elegance",
-    "flowers": "Ruby rose & cushion mums",
-    "category": "Bridal",
-    "img": "https://visakadivines.com/images/uploads/upl_ca31fb2b4f5fc25b.png",
-    "desc": "Deep ruby roses and cushion mums in a bold, photogenic varmala for the grandest entrances.",
-    "price": ""
-  },
-  {
-    "name": "Ruby Frost",
-    "flowers": "Red & white carnation",
-    "category": "Wedding",
-    "img": "https://visakadivines.com/images/uploads/upl_450d596b9d602256.png",
-    "desc": "Bold red and pure white carnations alternating in lush sections, finished with a rich red carnation tassel.",
-    "price": ""
-  },
-  {
-    "name": "Summer Meadow",
-    "flowers": "Rose & cushion mums",
-    "category": "Pooja & Festival",
-    "img": "https://visakadivines.com/images/uploads/upl_b03db045dea4fa51.png",
-    "desc": "Rose and cushion mums in a fresh, vibrant garland for pooja and festivals.",
-    "price": ""
-  },
-  {
-    "name": "Violet Fascination",
-    "flowers": "Violet cushion mums & white rose",
-    "category": "Bridal",
-    "img": "https://visakadivines.com/images/uploads/upl_300af6d67bf774b1.jpg",
-    "desc": "Violet cushion mums and white roses — a distinctive, standout pairing for a memorable wedding.",
-    "price": ""
-  },
-  {
-    "name": "White & Pink Carnation Rose",
-    "flowers": "White & pink carnation with rose",
-    "category": "Wedding",
-    "img": "https://visakadivines.com/images/thumbs/CAR_ROSE_WHITE_PINK1.jpg",
-    "desc": "White and pink carnations with rose accents — a bright, classic combination for any ceremony.",
-    "price": ""
-  },
-  {
-    "name": "White Whispers",
-    "flowers": "White rose, button mums & baby's breath",
-    "category": "Wedding",
-    "img": "https://visakadivines.com/images/uploads/upl_7e621f23a6c8afbc.jpg",
-    "desc": "Crisp white carnations and delicate baby's breath — timeless and elegant.",
-    "price": ""
+let PRODUCTS = [];
+
+function normalizeProduct(p){
+  return {
+    name: p.name || p.title || "",
+    flowers: p.flowers || p.material || "",
+    category: p.category || "Other",
+    img: p.img || p.image || p.imageUrl || "",
+    desc: p.desc || p.description || "",
+    price: p.price || ""
+  };
+}
+
+async function loadProducts(){
+  try{
+    const res = await fetch('/.netlify/functions/api/products');
+    const data = await res.json();
+    PRODUCTS = (Array.isArray(data) ? data : []).map(normalizeProduct);
+  }catch(e){
+    console.error('Failed to load products', e);
+    PRODUCTS = [];
   }
-];
+  categories = ["All", ...[...new Set(PRODUCTS.map(p=>p.category))]];
+  renderFilters();
+  renderGrid();
+  productSelect.innerHTML = `<option value="">General enquiry</option>` +
+    PRODUCTS.map(p=>`<option value="${p.name}">${p.name} — ${p.flowers}</option>`).join("");
+}
 
 /* per-category placeholder gradient */
 const CAT_TINT = {
@@ -584,7 +362,7 @@ const DEFAULT_TINT = ["#1B3A8F","#13286A"];
 const grid=document.getElementById('grid');
 const filtersEl=document.getElementById('filters');
 const emptyEl=document.getElementById('empty');
-const categories=["All",...[...new Set(PRODUCTS.map(p=>p.category))]];
+let categories=["All"];
 let active="All";
 
 function placeholder(cat){
@@ -595,12 +373,14 @@ function cardHTML(p){
   const open = p.img
     ? `<div class="photo"><img src="${p.img}" alt="${p.name} garland — ${p.flowers}"/>`
     : placeholder(p.category);
+  const priceHTML = p.price ? `<div class="price">${p.price}</div>` : "";
   return `<article class="card">
     ${open}<span class="tag">${p.category}</span></div>
     <div class="body">
       <span class="flowers">${p.flowers}</span>
       <h3>${p.name}</h3>
       <p>${p.desc}</p>
+      ${priceHTML}
       <button class="enquire-link" data-product="${p.name}">Enquire <span class="arr">›</span></button>
     </div>
   </article>`;
@@ -630,8 +410,6 @@ function renderFilters(){
 
 /* ---------- enquiry select + submit ---------- */
 const productSelect=document.getElementById('f-product');
-productSelect.innerHTML = `<option value="">General enquiry</option>` +
-  PRODUCTS.map(p=>`<option value="${p.name}">${p.name} — ${p.flowers}</option>`).join("");
 
 document.getElementById('sendBtn').addEventListener('click',()=>{
   const v=id=>document.getElementById(id).value.trim();
@@ -647,8 +425,7 @@ document.getElementById('sendBtn').addEventListener('click',()=>{
 });
 
 /* ---------- init ---------- */
-renderFilters();
-renderGrid();
+loadProducts();
 document.getElementById('yr').textContent=new Date().getFullYear();
 </script>
 
