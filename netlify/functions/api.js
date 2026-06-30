@@ -7,10 +7,19 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'changeme';
 let cachedClient = null;
 
 async function getDb() {
-  if (!cachedClient) {
-    cachedClient = new MongoClient(MONGO_URI);
-    await cachedClient.connect();
+  if (cachedClient) {
+    try {
+      // Quick health check - ping the connection
+      await cachedClient.db('admin').command({ ping: 1 });
+      return cachedClient.db(DB_NAME);
+    } catch (err) {
+      // Connection is dead, discard it and reconnect
+      cachedClient = null;
+    }
   }
+
+  cachedClient = new MongoClient(MONGO_URI);
+  await cachedClient.connect();
   return cachedClient.db(DB_NAME);
 }
 
