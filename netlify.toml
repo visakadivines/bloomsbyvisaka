@@ -17,3 +17,6 @@
   from = "/image/*"
   to = "/.netlify/functions/image/:splat"
   status = 200
+  
+  [[plugins]]
+  package = "@netlify/plugin-functions-install-core"
