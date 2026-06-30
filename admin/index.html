@@ -1,11 +1,621 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>bloomsbyVisaka Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #1B3A8F;
+      --red: #C8202E;
+      --dark: #1a1a2e;
+      --bg: #f5f5f0;
+      --white: #ffffff;
+      --border: #e5e7eb;
+      --muted: #6b7280;
+      --green: #16a34a;
+      --amber: #d97706;
+    }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--dark); }
+
+    /* LOGIN */
+    #login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    }
+    .login-box {
+      background: var(--white); border-radius: 12px; padding: 2.5rem;
+      width: 100%; max-width: 400px; box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .login-box .brand { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .login-box .brand .b1 { color: var(--navy); }
+    .login-box .brand .b2 { color: var(--red); }
+    .login-box p { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .login-box input {
+      width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border);
+      border-radius: 6px; font-size: 1rem; margin-bottom: 1rem;
+    }
+    .login-box button {
+      width: 100%; padding: 0.75rem; background: var(--navy); color: white;
+      border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer;
+    }
+    .login-box .error { color: var(--red); font-size: 0.85rem; margin-top: 0.5rem; }
+
+    /* LAYOUT */
+    #app { display: none; }
+    header {
+      background: var(--dark); color: white; padding: 0 1.5rem;
+      display: flex; align-items: center; gap: 1.5rem; height: 56px;
+    }
+    .header-brand { font-size: 1.2rem; font-weight: 700; }
+    .header-brand .b1 { color: #93c5fd; }
+    .header-brand .b2 { color: #fca5a5; }
+    .header-badge {
+      background: var(--red); color: white; font-size: 0.7rem;
+      font-weight: 700; padding: 2px 8px; border-radius: 999px; text-transform: uppercase;
+    }
+    nav { display: flex; gap: 0.25rem; flex: 1; }
+    nav button {
+      background: none; border: none; color: #d1d5db; padding: 0.5rem 1rem;
+      border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500;
+    }
+    nav button:hover, nav button.active { background: rgba(255,255,255,0.1); color: white; }
+    .header-right { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
+    .header-right a { color: #93c5fd; font-size: 0.85rem; text-decoration: none; }
+    .logout-btn {
+      background: none; border: 1px solid #6b7280; color: #d1d5db;
+      padding: 0.3rem 0.75rem; border-radius: 4px; cursor: pointer; font-size: 0.85rem;
+    }
+
+    main { padding: 2rem 1.5rem; max-width: 1200px; margin: 0 auto; }
+
+    /* DASHBOARD */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card {
+      background: var(--white); border-radius: 10px; padding: 1.5rem;
+      border: 1px solid var(--border);
+    }
+    .stat-card .num { font-size: 2.5rem; font-weight: 700; color: var(--navy); }
+    .stat-card .label { font-size: 0.75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.25rem; }
+    .info-card {
+      background: var(--white); border-radius: 10px; padding: 1.5rem;
+      border: 1px solid var(--border); margin-bottom: 1rem;
+    }
+    .info-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .info-card p { color: var(--muted); font-size: 0.9rem; margin-bottom: 1rem; }
+    .btn-row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .btn { padding: 0.5rem 1.25rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: var(--navy); color: white; }
+    .btn-secondary { background: white; color: var(--dark); border: 1px solid var(--border); }
+    .btn-danger { background: #fee2e2; color: var(--red); }
+    .btn-small { padding: 0.3rem 0.75rem; font-size: 0.8rem; }
+
+    /* PRODUCTS LIST */
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    .page-header h2 { font-size: 1.5rem; font-weight: 700; }
+    .page-header p { color: var(--muted); font-size: 0.9rem; }
+    .filters { display: flex; gap: 0.75rem; margin-bottom: 1rem; }
+    .filters select {
+      padding: 0.5rem 0.75rem; border: 1px solid var(--border);
+      border-radius: 6px; font-size: 0.9rem; background: white;
+    }
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+    th { background: var(--bg); padding: 0.75rem 1rem; text-align: left; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+    td { padding: 0.75rem 1rem; border-top: 1px solid var(--border); font-size: 0.9rem; vertical-align: middle; }
+    td img { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; }
+    .status-badge {
+      display: inline-block; padding: 2px 10px; border-radius: 999px;
+      font-size: 0.75rem; font-weight: 600;
+    }
+    .status-published { background: #dcfce7; color: var(--green); }
+    .status-draft { background: #fef3c7; color: var(--amber); }
+
+    /* EDIT FORM */
+    .form-card { background: white; border-radius: 10px; border: 1px solid var(--border); padding: 1.5rem; margin-bottom: 1rem; }
+    .form-card h3 { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 1.25rem; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--dark); }
+    .form-group input, .form-group select, .form-group textarea {
+      padding: 0.6rem 0.75rem; border: 1px solid var(--border);
+      border-radius: 6px; font-size: 0.9rem; font-family: inherit;
+    }
+    .form-group textarea { min-height: 100px; resize: vertical; }
+    .form-group .hint { font-size: 0.75rem; color: var(--muted); }
+    .img-preview { width: 120px; height: 120px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); display: block; margin-bottom: 0.5rem; }
+    .top-bar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+    .top-bar .back { background: none; border: none; color: var(--navy); cursor: pointer; font-size: 0.9rem; font-weight: 600; }
+    .save-status { font-size: 0.85rem; color: var(--green); font-weight: 600; }
+
+    /* ENQUIRIES */
+    .enquiry-row td:first-child { font-weight: 600; }
+    .new-badge { background: var(--navy); color: white; padding: 2px 8px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
+
+    /* TOAST */
+    #toast {
+      position: fixed; bottom: 2rem; right: 2rem; background: var(--dark); color: white;
+      padding: 0.75rem 1.25rem; border-radius: 8px; font-size: 0.9rem;
+      opacity: 0; transition: opacity 0.3s; z-index: 9999; pointer-events: none;
+    }
+    #toast.show { opacity: 1; }
+
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .form-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-  <script src="https://unpkg.com/netlify-cms@^2.0.0/dist/netlify-cms.js"></script>
+
+<div id="login-screen">
+  <div class="login-box">
+    <div class="brand"><span class="b1">bloomsby</span><span class="b2">Visaka</span></div>
+    <p>Admin Portal</p>
+    <input type="password" id="pwd-input" placeholder="Enter admin password" />
+    <button onclick="login()">Login</button>
+    <div class="error" id="login-error"></div>
+  </div>
+</div>
+
+<div id="app">
+  <header>
+    <div class="header-brand"><span class="b1">bloomsby</span><span class="b2">Visaka</span></div>
+    <span class="header-badge">Admin</span>
+    <nav>
+      <button onclick="showPage('dashboard')" id="nav-dashboard" class="active">Dashboard</button>
+      <button onclick="showPage('products')" id="nav-products">Products</button>
+      <button onclick="showPage('enquiries')" id="nav-enquiries">Enquiries <span id="enquiry-badge"></span></button>
+    </nav>
+    <div class="header-right">
+      <a href="https://bloomsbyvisaka.com" target="_blank">View site</a>
+      <span id="admin-email" style="color:#9ca3af;font-size:0.85rem;"></span>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- DASHBOARD -->
+    <div id="page-dashboard">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <div>
+          <h2 style="font-size:1.75rem;font-weight:700;">Dashboard</h2>
+          <p style="color:var(--muted);">Manage your product catalog and enquiries.</p>
+        </div>
+        <button class="btn btn-primary" onclick="showPage('products')">Manage products</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="num" id="stat-published">—</div><div class="label">Published Products</div></div>
+        <div class="stat-card"><div class="num" id="stat-drafts">—</div><div class="label">Drafts</div></div>
+        <div class="stat-card"><div class="num" id="stat-enquiries">—</div><div class="label">New Enquiries</div></div>
+        <div class="stat-card"><div class="num" id="stat-total">—</div><div class="label">All Products</div></div>
+      </div>
+      <div class="info-card">
+        <h3>Garland enquiries</h3>
+        <p id="enquiry-summary">Loading...</p>
+        <button class="btn btn-secondary" onclick="showPage('enquiries')">View enquiries</button>
+      </div>
+      <div class="info-card">
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="newProduct()">New product</button>
+          <button class="btn btn-secondary" onclick="showPage('products')">View all products</button>
+          <a href="https://bloomsbyvisaka.com" target="_blank" class="btn btn-secondary" style="text-decoration:none;display:inline-flex;align-items:center;">Open website</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUCTS LIST -->
+    <div id="page-products" style="display:none;">
+      <div class="page-header">
+        <div>
+          <h2>Products</h2>
+          <p id="products-count"></p>
+        </div>
+        <button class="btn btn-primary" onclick="newProduct()">New product</button>
+      </div>
+      <div class="filters">
+        <select id="filter-category" onchange="filterProducts()">
+          <option value="">All categories</option>
+          <option value="Wedding">Wedding</option>
+          <option value="Bridal">Bridal</option>
+          <option value="Pooja & Festival">Pooja & Festival</option>
+          <option value="Fragrant Soaps">Fragrant Soaps</option>
+          <option value="Condolence">Condolence</option>
+        </select>
+        <select id="filter-status" onchange="filterProducts()">
+          <option value="">All statuses</option>
+          <option value="published">Published</option>
+          <option value="draft">Draft</option>
+        </select>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Sort</th>
+            <th>Updated</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="products-table-body"></tbody>
+      </table>
+    </div>
+
+    <!-- EDIT/NEW PRODUCT -->
+    <div id="page-edit" style="display:none;">
+      <div class="top-bar">
+        <button class="back" onclick="showPage('products')">← Back to products</button>
+        <span id="edit-status-label" class="status-badge"></span>
+        <span class="save-status" id="save-status"></span>
+        <div style="margin-left:auto;display:flex;gap:0.75rem;">
+          <button class="btn btn-secondary" onclick="showPage('products')">Cancel</button>
+          <button class="btn btn-primary" onclick="saveProduct()" id="save-btn">Save product</button>
+        </div>
+      </div>
+      <h2 id="edit-title" style="font-size:1.5rem;font-weight:700;margin-bottom:0.25rem;">Edit product</h2>
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1.5rem;">Choose a product image below, then click <strong>Save product</strong>.</p>
+
+      <input type="hidden" id="edit-id" />
+
+      <div class="form-card">
+        <h3>Basics</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Product Name *</label>
+            <input type="text" id="edit-name" placeholder="e.g. Crimson Opulence" />
+          </div>
+          <div class="form-group">
+            <label>Flowers / Material</label>
+            <input type="text" id="edit-flowers" placeholder="e.g. Red rose & gold bead" />
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select id="edit-category">
+              <option value="Wedding">Wedding</option>
+              <option value="Bridal">Bridal</option>
+              <option value="Pooja & Festival">Pooja & Festival</option>
+              <option value="Fragrant Soaps">Fragrant Soaps</option>
+              <option value="Condolence">Condolence</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="edit-status">
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+            </select>
+            <span class="hint">Only Published appears on the live website.</span>
+          </div>
+          <div class="form-group">
+            <label>Price (optional)</label>
+            <input type="text" id="edit-price" placeholder="e.g. Starting at $125" />
+          </div>
+          <div class="form-group">
+            <label>Sort Order</label>
+            <input type="number" id="edit-sort" value="0" />
+            <span class="hint">Lower numbers appear first.</span>
+          </div>
+          <div class="form-group full">
+            <label>Description *</label>
+            <textarea id="edit-desc" placeholder="Short description shown on the garland card..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h3>Product Image</h3>
+        <img id="img-preview" class="img-preview" src="" style="display:none;" />
+        <input type="text" id="edit-img-url" placeholder="Image URL or upload below" style="margin-bottom:0.5rem;width:100%;padding:0.6rem 0.75rem;border:1px solid var(--border);border-radius:6px;" />
+        <div style="margin-top:0.5rem;">
+          <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:0.4rem;">Or upload new image:</label>
+          <input type="file" id="img-upload" accept="image/*" onchange="handleImageUpload(event)" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ENQUIRIES -->
+    <div id="page-enquiries" style="display:none;">
+      <div class="page-header">
+        <div>
+          <h2>Enquiries</h2>
+          <p>Submissions from the enquiry form on the public site.</p>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Received</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Event Date</th>
+            <th>Message</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="enquiries-table-body"></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const API = '/.netlify/functions/api';
+  let TOKEN = '';
+  let allProducts = [];
+  let editingProduct = null;
+  let uploadedImageUrl = '';
+
+  // LOGIN
+  function login() {
+    const pwd = document.getElementById('pwd-input').value;
+    TOKEN = pwd;
+    fetch(`${API}/admin/stats`, { headers: { Authorization: `Bearer ${TOKEN}` } })
+      .then(r => {
+        if (r.ok) {
+          document.getElementById('login-screen').style.display = 'none';
+          document.getElementById('app').style.display = 'block';
+          loadDashboard();
+        } else {
+          document.getElementById('login-error').textContent = 'Incorrect password.';
+          TOKEN = '';
+        }
+      }).catch(() => {
+        document.getElementById('login-error').textContent = 'Connection error. Try again.';
+      });
+  }
+
+  document.getElementById('pwd-input').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+
+  function logout() {
+    TOKEN = '';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+  }
+
+  // NAVIGATION
+  function showPage(page) {
+    ['dashboard','products','edit','enquiries'].forEach(p => {
+      document.getElementById(`page-${p}`).style.display = p === page ? 'block' : 'none';
+    });
+    ['dashboard','products','enquiries'].forEach(p => {
+      const btn = document.getElementById(`nav-${p}`);
+      if (btn) btn.classList.toggle('active', p === page);
+    });
+    if (page === 'dashboard') loadDashboard();
+    if (page === 'products') loadProducts();
+    if (page === 'enquiries') loadEnquiries();
+  }
+
+  // DASHBOARD
+  async function loadDashboard() {
+    const r = await fetch(`${API}/admin/stats`, { headers: { Authorization: `Bearer ${TOKEN}` } });
+    const s = await r.json();
+    document.getElementById('stat-published').textContent = s.published;
+    document.getElementById('stat-drafts').textContent = s.drafts;
+    document.getElementById('stat-total').textContent = s.total;
+    document.getElementById('stat-enquiries').textContent = s.newEnquiries;
+    document.getElementById('enquiry-summary').textContent =
+      s.newEnquiries > 0 ? `${s.newEnquiries} new enquiry awaiting review.` : 'No new enquiries.';
+    if (s.newEnquiries > 0) {
+      document.getElementById('enquiry-badge').innerHTML = `<span style="background:var(--red);color:white;border-radius:999px;padding:1px 6px;font-size:0.7rem;margin-left:4px;">${s.newEnquiries}</span>`;
+    }
+  }
+
+  // PRODUCTS
+  async function loadProducts() {
+    const r = await fetch(`${API}/admin/products`, { headers: { Authorization: `Bearer ${TOKEN}` } });
+    allProducts = await r.json();
+    document.getElementById('products-count').textContent = `${allProducts.length} items`;
+    renderProductsTable(allProducts);
+  }
+
+  function filterProducts() {
+    const cat = document.getElementById('filter-category').value;
+    const status = document.getElementById('filter-status').value;
+    let filtered = allProducts;
+    if (cat) filtered = filtered.filter(p => p.category === cat);
+    if (status) filtered = filtered.filter(p => p.status === status);
+    renderProductsTable(filtered);
+  }
+
+  function renderProductsTable(products) {
+    const tbody = document.getElementById('products-table-body');
+    if (products.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem;">No products found.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = products.map(p => `
+      <tr>
+        <td>${p.img ? `<img src="${p.img}" onerror="this.style.display='none'" />` : '<div style="width:48px;height:48px;background:#f3f4f6;border-radius:6px;"></div>'}</td>
+        <td style="font-weight:600;max-width:300px;">${p.name || '—'}</td>
+        <td style="color:var(--muted);">${p.category || '—'}</td>
+        <td><span class="status-badge status-${p.status || 'draft'}">${p.status || 'draft'}</span></td>
+        <td style="color:var(--muted);">${p.sortOrder || 0}</td>
+        <td style="color:var(--muted);font-size:0.8rem;">${p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : '—'}</td>
+        <td>
+          <button class="btn btn-secondary btn-small" onclick="editProduct('${p._id}')">Edit</button>
+          <button class="btn btn-danger btn-small" style="margin-left:4px;" onclick="deleteProduct('${p._id}','${p.name}')">Delete</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // EDIT / NEW PRODUCT
+  function newProduct() {
+    editingProduct = null;
+    uploadedImageUrl = '';
+    document.getElementById('edit-id').value = '';
+    document.getElementById('edit-name').value = '';
+    document.getElementById('edit-flowers').value = '';
+    document.getElementById('edit-category').value = 'Wedding';
+    document.getElementById('edit-status').value = 'draft';
+    document.getElementById('edit-price').value = '';
+    document.getElementById('edit-sort').value = '0';
+    document.getElementById('edit-desc').value = '';
+    document.getElementById('edit-img-url').value = '';
+    document.getElementById('img-preview').style.display = 'none';
+    document.getElementById('edit-title').textContent = 'New product';
+    document.getElementById('edit-status-label').textContent = 'Draft';
+    document.getElementById('edit-status-label').className = 'status-badge status-draft';
+    document.getElementById('save-status').textContent = '';
+    showPage('edit');
+  }
+
+  function editProduct(id) {
+    const p = allProducts.find(x => x._id === id);
+    if (!p) return;
+    editingProduct = p;
+    uploadedImageUrl = '';
+    document.getElementById('edit-id').value = p._id;
+    document.getElementById('edit-name').value = p.name || '';
+    document.getElementById('edit-flowers').value = p.flowers || '';
+    document.getElementById('edit-category').value = p.category || 'Wedding';
+    document.getElementById('edit-status').value = p.status || 'draft';
+    document.getElementById('edit-price').value = p.price || '';
+    document.getElementById('edit-sort').value = p.sortOrder || 0;
+    document.getElementById('edit-desc').value = p.desc || p.description || '';
+    document.getElementById('edit-img-url').value = p.img || '';
+    const preview = document.getElementById('img-preview');
+    if (p.img) { preview.src = p.img; preview.style.display = 'block'; }
+    else preview.style.display = 'none';
+    document.getElementById('edit-title').textContent = 'Edit product';
+    const statusLabel = p.status || 'draft';
+    document.getElementById('edit-status-label').textContent = statusLabel.charAt(0).toUpperCase() + statusLabel.slice(1);
+    document.getElementById('edit-status-label').className = `status-badge status-${statusLabel}`;
+    document.getElementById('save-status').textContent = '';
+    showPage('edit');
+  }
+
+  async function saveProduct() {
+    const id = document.getElementById('edit-id').value;
+    const imgUrl = uploadedImageUrl || document.getElementById('edit-img-url').value;
+    const data = {
+      name: document.getElementById('edit-name').value,
+      flowers: document.getElementById('edit-flowers').value,
+      category: document.getElementById('edit-category').value,
+      status: document.getElementById('edit-status').value,
+      price: document.getElementById('edit-price').value,
+      sortOrder: parseInt(document.getElementById('edit-sort').value) || 0,
+      desc: document.getElementById('edit-desc').value,
+      img: imgUrl
+    };
+
+    if (!data.name) { showToast('Product name is required'); return; }
+
+    document.getElementById('save-btn').textContent = 'Saving...';
+    document.getElementById('save-btn').disabled = true;
+
+    const url = id ? `${API}/admin/products/${id}` : `${API}/admin/products`;
+    const method = id ? 'PUT' : 'POST';
+
+    const r = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${TOKEN}` },
+      body: JSON.stringify(data)
+    });
+
+    document.getElementById('save-btn').textContent = 'Save product';
+    document.getElementById('save-btn').disabled = false;
+
+    if (r.ok) {
+      document.getElementById('save-status').textContent = '✓ All changes saved';
+      showToast(id ? 'Product updated!' : 'Product created!');
+      if (!id) {
+        const result = await r.json();
+        document.getElementById('edit-id').value = result._id;
+        editingProduct = result;
+      }
+    } else {
+      showToast('Error saving product. Try again.');
+    }
+  }
+
+  async function deleteProduct(id, name) {
+    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+    await fetch(`${API}/admin/products/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${TOKEN}` }
+    });
+    showToast('Product deleted');
+    loadProducts();
+  }
+
+  // IMAGE UPLOAD
+  async function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const base64 = e.target.result.split(',')[1];
+      showToast('Uploading image...');
+      const r = await fetch('/.netlify/functions/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${TOKEN}` },
+        body: JSON.stringify({ imageData: base64, fileName: file.name, mimeType: file.type })
+      });
+      if (r.ok) {
+        const result = await r.json();
+        uploadedImageUrl = result.url;
+        document.getElementById('edit-img-url').value = result.url;
+        const preview = document.getElementById('img-preview');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        showToast('Image uploaded!');
+      } else {
+        showToast('Image upload failed');
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ENQUIRIES
+  async function loadEnquiries() {
+    const r = await fetch(`${API}/admin/enquiries`, { headers: { Authorization: `Bearer ${TOKEN}` } });
+    const enquiries = await r.json();
+    const tbody = document.getElementById('enquiries-table-body');
+    if (enquiries.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem;">No enquiries yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = enquiries.map(e => `
+      <tr class="enquiry-row">
+        <td style="font-size:0.8rem;">${new Date(e.createdAt).toLocaleDateString()}</td>
+        <td>${e.name || '—'}</td>
+        <td style="color:var(--muted);">${e.email || '—'}</td>
+        <td>${e.eventDate || '—'}</td>
+        <td style="max-width:250px;color:var(--muted);font-size:0.85rem;">${(e.message || '').substring(0, 80)}${(e.message || '').length > 80 ? '...' : ''}</td>
+        <td>${e.status === 'new' ? '<span class="new-badge">New</span>' : '<span style="color:var(--muted);font-size:0.85rem;">Seen</span>'}</td>
+        <td><button class="btn btn-secondary btn-small" onclick="markSeen('${e._id}')">Mark seen</button></td>
+      </tr>
+    `).join('');
+  }
+
+  async function markSeen(id) {
+    await fetch(`${API}/admin/enquiries/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${TOKEN}` },
+      body: JSON.stringify({ status: 'seen' })
+    });
+    loadEnquiries();
+  }
+
+  // TOAST
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // INIT
+  showPage('dashboard');
+</script>
 </body>
 </html>
