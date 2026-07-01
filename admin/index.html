@@ -212,7 +212,10 @@
           <h2>Products</h2>
           <p id="products-count"></p>
         </div>
-        <button class="btn btn-primary" onclick="newProduct()">New product</button>
+        <div style="display:flex;gap:0.75rem;">
+          <button class="btn btn-secondary" id="publish-selected-btn" onclick="publishSelected()" style="display:none;">Publish selected (<span id="selected-count">0</span>)</button>
+          <button class="btn btn-primary" onclick="newProduct()">New product</button>
+        </div>
       </div>
       <div class="filters">
         <select id="filter-category" onchange="filterProducts()">
@@ -232,6 +235,7 @@
       <table>
         <thead>
           <tr>
+            <th><input type="checkbox" id="select-all-checkbox" onchange="toggleSelectAll(this)" /></th>
             <th></th>
             <th>Title</th>
             <th>Category</th>
@@ -351,6 +355,7 @@
   let allProducts = [];
   let editingProduct = null;
   let uploadedImageUrl = '';
+  let selectedIds = new Set();
 
   // LOGIN
   function login() {
@@ -414,6 +419,7 @@
     allProducts = await r.json();
     document.getElementById('products-count').textContent = `${allProducts.length} items`;
     renderProductsTable(allProducts);
+    updateSelectedCount();
   }
 
   function filterProducts() {
@@ -425,14 +431,63 @@
     renderProductsTable(filtered);
   }
 
+  function toggleSelectAll(checkbox) {
+    const rowBoxes = document.querySelectorAll('.row-checkbox');
+    rowBoxes.forEach(cb => {
+      cb.checked = checkbox.checked;
+      if (checkbox.checked) selectedIds.add(cb.dataset.id);
+      else selectedIds.delete(cb.dataset.id);
+    });
+    updateSelectedCount();
+  }
+
+  function toggleRowSelect(checkbox) {
+    if (checkbox.checked) selectedIds.add(checkbox.dataset.id);
+    else selectedIds.delete(checkbox.dataset.id);
+    updateSelectedCount();
+  }
+
+  function updateSelectedCount() {
+    const btn = document.getElementById('publish-selected-btn');
+    document.getElementById('selected-count').textContent = selectedIds.size;
+    btn.style.display = selectedIds.size > 0 ? 'inline-block' : 'none';
+  }
+
+  async function publishSelected() {
+    if (selectedIds.size === 0) return;
+    if (!confirm(`Publish ${selectedIds.size} selected product(s)?`)) return;
+    const btn = document.getElementById('publish-selected-btn');
+    btn.textContent = 'Publishing...';
+    btn.disabled = true;
+    const ids = [...selectedIds];
+    let success = 0, failed = 0;
+    for (const id of ids) {
+      try {
+        const r = await fetch(`${API}/admin/products/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${TOKEN}` },
+          body: JSON.stringify({ status: 'published' })
+        });
+        if (r.ok) success++; else failed++;
+      } catch (e) { failed++; }
+    }
+    selectedIds.clear();
+    showToast(`Published ${success} product(s)${failed ? `, ${failed} failed` : ''}.`);
+    btn.disabled = false;
+    btn.innerHTML = 'Publish selected (<span id="selected-count">0</span>)';
+    document.getElementById('select-all-checkbox').checked = false;
+    loadProducts();
+  }
+
   function renderProductsTable(products) {
     const tbody = document.getElementById('products-table-body');
     if (products.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem;">No products found.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem;">No products found.</td></tr>';
       return;
     }
     tbody.innerHTML = products.map(p => `
       <tr>
+        <td><input type="checkbox" class="row-checkbox" data-id="${p._id}" ${selectedIds.has(p._id) ? 'checked' : ''} onchange="toggleRowSelect(this)" /></td>
         <td>${p.img ? `<img src="${p.img}" onerror="this.style.display='none'" />` : '<div style="width:48px;height:48px;background:#f3f4f6;border-radius:6px;"></div>'}</td>
         <td style="font-weight:600;max-width:300px;">${p.name || '—'}</td>
         <td style="color:var(--muted);">${p.category || '—'}</td>
