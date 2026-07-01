@@ -1,43 +1,87 @@
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 
-exports.handler = async (event) => {
-  const headers = {
+const MONGO_URI = process.env.MONGODB_URI;
+const DB_NAME = process.env.MONGODB_DB || 'bloomsbyvisaka';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'changeme';
+
+let cachedClient = null;
+
+async function getDb() {
+  if (cachedClient) {
+    try {
+      await cachedClient.db('admin').command({ ping: 1 });
+      return cachedClient.db(DB_NAME);
+    } catch (err) {
+      cachedClient = null;
+    }
+  }
+  cachedClient = new MongoClient(MONGO_URI);
+  await cachedClient.connect();
+  return cachedClient.db(DB_NAME);
+}
+
+function corsHeaders() {
+  return {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Content-Type': 'application/json'
   };
+}
 
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
+exports.handler = async (event) => {
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers: corsHeaders(), body: '' };
+  }
 
-  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'changeme';
-  const auth = (event.headers['authorization'] || '').replace('Bearer ', '');
-  if (auth !== ADMIN_PASSWORD) return { statusCode: 401, headers, body: JSON.stringify({ error: 'Unauthorized' }) };
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, headers: corsHeaders(), body: JSON.stringify({ error: 'Method not allowed' }) };
+  }
 
-  // Image is sent as base64
+  // Check auth
+  const auth = event.headers['authorization'] || event.headers['Authorization'] || '';
+  const token = auth.replace('Bearer ', '');
+  if (token !== ADMIN_PASSWORD) {
+    return { statusCode: 401, headers: corsHeaders(), body: JSON.stringify({ error: 'Unauthorized' }) };
+  }
+
   try {
-    const body = JSON.parse(event.body);
-    const { imageData, fileName, mimeType } = body;
+    const { imageData, fileName, mimeType } = JSON.parse(event.body);
 
-    // Store image as base64 in MongoDB (for simplicity)
-    // In production, use Cloudinary or similar
-    const MONGO_URI = process.env.MONGODB_URI;
-    const DB_NAME = process.env.MONGODB_DB || 'bloomsbyvisaka';
-    const client = new MongoClient(MONGO_URI);
-    await client.connect();
-    const db = client.db(DB_NAME);
+    if (!imageData || !mimeType) {
+      return { statusCode: 400, headers: corsHeaders(), body: JSON.stringify({ error: 'Missing imageData or mimeType' }) };
+    }
+
+    // Validate it's an image
+    if (!mimeType.startsWith('image/')) {
+      return { statusCode: 400, headers: corsHeaders(), body: JSON.stringify({ error: 'Only image files are allowed' }) };
+    }
+
+    // Check size — base64 is ~33% larger than original, so 5MB original ≈ 6.7MB base64
+    if (imageData.length > 7 * 1024 * 1024) {
+      return { statusCode: 400, headers: corsHeaders(), body: JSON.stringify({ error: 'Image too large. Please use an image under 5MB.' }) };
+    }
+
+    const db = await getDb();
 
     const result = await db.collection('images').insertOne({
-      fileName,
-      mimeType,
       data: imageData,
+      mimeType,
+      fileName: fileName || 'upload',
       createdAt: new Date()
     });
 
-    await client.close();
+    const imageId = result.insertedId.toString();
+    const url = `/.netlify/functions/image/${imageId}`;
 
-    const imageUrl = `/.netlify/functions/image/${result.insertedId}`;
-    return { statusCode: 200, headers, body: JSON.stringify({ url: imageUrl }) };
+    return {
+      statusCode: 200,
+      headers: corsHeaders(),
+      body: JSON.stringify({ url, id: imageId })
+    };
+
   } catch (err) {
-    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
+    console.error('Upload error:', err);
+    return { statusCode: 500, headers: corsHeaders(), body: JSON.stringify({ error: err.message }) };
   }
 };
